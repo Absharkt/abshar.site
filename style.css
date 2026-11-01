@@ -1,0 +1,431 @@
+/* ==========================================================================
+   Minimal portfolio — "Paper" theme
+   1 Tokens  2 Base  3 Layout  4 Sidebar  5 Sections  6 Work  7 Rows
+   8 Contact & footer  9 UI  10 Motion  11 Reduced motion
+   ========================================================================== */
+
+/* ---------- 1. Tokens ---------- */
+:root {
+  /* Light "paper". Contrast on --bg: text 14:1, text-2 8:1, text-3 6:1, accent 5:1 */
+  --bg: #F5F4F0;
+  --text: #1F1F1F;
+  --text-2: #444444;       /* body copy */
+  --text-3: #5C5C5C;       /* small metadata */
+  --border: #D3D1CA;
+  --surface: #ECEAE4;      /* image and photo placeholders */
+  --accent: #3D6A9E;       /* one muted steel blue: links, active state, focus */
+  --online: #3E9B6F;       /* availability dot */
+
+  /* Work thumbnails: a resting tint, and a stronger scrim on hover */
+  --thumb-tint: linear-gradient(to top, rgba(18, 22, 30, 0.16), rgba(18, 22, 30, 0) 50%);
+  --thumb-scrim: rgba(18, 22, 30, 0.7);
+
+  --font-serif: "Instrument Serif", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-sans: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --gutter: clamp(1.25rem, 5vw, 3rem);
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  /* Contrast on --bg: text 14.9:1, text-2 10:1, text-3 7:1, accent 8:1 */
+  --bg: #151515;
+  --text: #EAE8E2;
+  --text-2: #C4C2BC;
+  --text-3: #A09E99;
+  --border: #383838;
+  --surface: #1E1E1E;
+  --accent: #8DB0DA;
+  --online: #5CC08F;
+
+  /* Tames bright screenshots against the dark page */
+  --thumb-tint: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2));
+  --thumb-scrim: rgba(0, 0, 0, 0.72);
+  color-scheme: dark;
+}
+
+/* ---------- 2. Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, p, ul, ol, dl, dd { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+svg { flex-shrink: 0; }
+p { text-wrap: pretty; }
+::selection { background: var(--accent); color: var(--bg); }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.skip-link {
+  position: fixed; left: 1rem; top: -4rem; z-index: 100;
+  padding: 0.6rem 0.9rem; border-radius: 6px;
+  background: var(--text); color: var(--bg); font-weight: 600; font-size: 0.9375rem;
+  transition: top 150ms var(--ease);
+}
+.skip-link:focus { top: 1rem; }
+
+/* Underline that draws in on hover */
+.u-link {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat; background-position: 0 100%; background-size: 0 1px;
+  padding-bottom: 1px;
+  transition: background-size 250ms var(--ease), color 200ms;
+}
+.u-link:hover, .u-link:focus-visible { background-size: 100% 1px; color: var(--text); }
+
+/* Placeholder links tell the truth instead of jumping to the top */
+a[data-placeholder] { cursor: help; }
+
+/* ---------- 3. Layout ---------- */
+.layout {
+  display: flex; flex-direction: column;
+  max-width: 74rem; margin-inline: auto; padding-inline: var(--gutter);
+}
+
+/* Mobile: the sidebar dissolves into the page. Intro first, then a sticky nav strip, then content. */
+.side { display: contents; }
+.side-intro { order: 1; padding-top: clamp(2.5rem, 10vw, 4rem); padding-bottom: 1.75rem; }
+.side-foot  { order: 2; padding-bottom: 2rem; }
+.side-nav   { order: 3; }
+main        { order: 4; }
+.site-footer { order: 5; }
+
+@media (min-width: 61rem) {
+  .layout {
+    display: grid;
+    grid-template-columns: 19rem minmax(0, 1fr);
+    column-gap: clamp(3rem, 7vw, 6.5rem);
+  }
+  .side {
+    display: flex; flex-direction: column;
+    grid-column: 1; grid-row: 1 / span 2;
+    position: sticky; top: 0; align-self: start;
+    height: 100vh; height: 100svh;
+    padding-block: clamp(2.5rem, 7vh, 4.5rem) 2rem;
+    overflow-y: auto; scrollbar-width: none;
+  }
+  .side::-webkit-scrollbar { display: none; }
+  .side-intro { order: 1; padding: 0; }
+  .side-nav   { order: 2; }
+  .side-foot  { order: 3; padding-bottom: 0; }
+  main { grid-column: 2; grid-row: 1; }
+  .site-footer { grid-column: 2; grid-row: 2; }
+}
+
+/* ---------- 4. Sidebar ---------- */
+.avatar {
+  display: grid; place-items: center;
+  width: 4.5rem; height: 4.5rem; border-radius: 18px;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text-3);
+  object-fit: cover;                       /* applies when this becomes an <img> */
+}
+
+.name {
+  margin-top: 1.25rem;
+  font-family: var(--font-serif); font-weight: 400;
+  font-size: clamp(3rem, 2.4rem + 3vw, 3.75rem);
+  line-height: 1; letter-spacing: -0.02em;
+}
+.role { margin-top: 0.5rem; font-size: 1.125rem; font-weight: 500; }
+.blurb { margin-top: 1rem; max-width: 32ch; color: var(--text-2); font-size: 1rem; line-height: 1.65; }
+
+.avail {
+  display: inline-flex; align-items: center; gap: 0.6rem; margin-top: 1.1rem;
+  font-size: 0.875rem; line-height: 1.4; color: var(--text-2);
+}
+.avail-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--online); }
+
+/* Desktop nav: a vertical index with a short line that grows on the current section */
+.side-nav { margin-top: clamp(1.75rem, 5vh, 3.25rem); }
+.side-nav a {
+  display: flex; align-items: center; gap: 0.9rem;
+  padding: 0.35rem 0; font-size: 1rem; color: var(--text-3);
+  transition: color 200ms;
+}
+.side-nav a::before {
+  content: ""; width: 1.25rem; height: 1px; background: currentColor;
+  transition: width 300ms var(--ease), background-color 200ms;
+}
+.side-nav a:hover, .side-nav a[aria-current="true"] { color: var(--text); }
+.side-nav a:hover::before, .side-nav a[aria-current="true"]::before { width: 2.75rem; }
+.side-nav a[aria-current="true"]::before { background: var(--accent); }
+.side-nav a[aria-current="true"] { font-weight: 600; }
+
+.side-foot { display: flex; flex-direction: column; align-items: flex-start; gap: 1.1rem; margin-top: auto; padding-top: 1.75rem; }
+.side-links { display: flex; flex-wrap: wrap; gap: 0.35rem 1.1rem; font-size: 0.9375rem; color: var(--text-2); }
+
+/* Theme toggle: the sun and moon swap with a turn; the page itself wipes in a circle (see script.js) */
+.theme-toggle {
+  position: relative; display: inline-block; flex: none;
+  width: 2.5rem; height: 2.5rem; padding: 0;
+  border: 1px solid var(--border); border-radius: 50%;
+  background: transparent; color: var(--text-2); cursor: pointer;
+  view-transition-name: theme-toggle;
+  transition: border-color 200ms, color 200ms;
+}
+.theme-toggle:hover { border-color: var(--text-3); color: var(--text); }
+.theme-toggle .icon {
+  position: absolute; inset: 0; margin: auto;
+  transition: transform 450ms var(--ease), opacity 250ms;
+}
+.icon-moon { opacity: 1; transform: none; }
+.icon-sun  { opacity: 0; transform: rotate(-80deg) scale(0.4); }
+:root[data-theme="dark"] .icon-moon { opacity: 0; transform: rotate(80deg) scale(0.4); }
+:root[data-theme="dark"] .icon-sun  { opacity: 1; transform: none; }
+
+/* Short heights (laptops): tighten the sidebar so everything still fits */
+@media (min-width: 61rem) and (max-height: 820px) {
+  .side { padding-top: 2.25rem; padding-bottom: 1.5rem; }
+  .avatar { width: 3.75rem; height: 3.75rem; border-radius: 15px; }
+  .name { margin-top: 1rem; font-size: 3rem; }
+  .blurb { margin-top: 0.75rem; font-size: 0.9375rem; }
+  .avail { margin-top: 0.85rem; }
+  .side-nav { margin-top: 1.5rem; }
+  .side-nav a { padding: 0.25rem 0; }
+  .side-foot { padding-top: 1.25rem; gap: 0.9rem; }
+}
+
+/* Mobile nav strip + floating theme toggle */
+@media (max-width: 60.99rem) {
+  .side-nav {
+    position: sticky; top: 0; z-index: 20;
+    margin: 0 calc(var(--gutter) * -1);
+    background: var(--bg);
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border); border-top: 1px solid var(--border);
+  }
+  .side-nav ul {
+    display: flex; gap: 1.6rem; padding: 0 var(--gutter);
+    overflow-x: auto; scrollbar-width: none; white-space: nowrap;
+  }
+  .side-nav ul::-webkit-scrollbar { display: none; }
+  .side-nav a { padding: 0.9rem 0; position: relative; }
+  .side-nav a::before { position: absolute; left: 0; bottom: -1px; width: 0; height: 2px; }
+  .side-nav a:hover::before, .side-nav a[aria-current="true"]::before { width: 100%; }
+
+  .side-foot { display: block; margin-top: 0; padding-top: 0; }
+  .theme-toggle {
+    position: fixed; right: 1rem; bottom: 1rem; z-index: 30;
+    background: var(--bg); width: 2.875rem; height: 2.875rem;
+  }
+}
+
+/* ---------- 5. Sections ---------- */
+.section {
+  padding-block: clamp(4rem, 10vh, 6.5rem);
+  border-top: 1px solid var(--border);
+  scroll-margin-top: 3rem;
+}
+.section:first-child { border-top: 0; padding-top: 2.5rem; }
+@media (min-width: 61rem) {
+  .section { scroll-margin-top: 0; }
+  .section:first-child { padding-top: clamp(2.5rem, 7vh, 4.5rem); }
+}
+
+/* Real headings: serif, large enough to scan */
+.section-title {
+  margin-bottom: clamp(1.75rem, 4vw, 2.5rem);
+  font-family: var(--font-serif); font-weight: 400;
+  font-size: clamp(2rem, 1.5rem + 1.8vw, 2.75rem);
+  line-height: 1.1; letter-spacing: -0.015em; text-wrap: balance;
+}
+
+.prose { max-width: 62ch; }
+.prose p { font-size: 1.0625rem; line-height: 1.8; color: var(--text-2); }
+.prose p:first-child { color: var(--text); }       /* the lead paragraph reads first */
+.prose p + p { margin-top: 1.25rem; }
+
+.cta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.6rem 1.75rem; margin-top: 2.5rem; }
+.text-link {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-size: 1.0625rem; font-weight: 600; color: var(--text);
+  border-bottom: 1px solid var(--accent); padding-bottom: 3px;
+  transition: color 200ms, gap 250ms var(--ease);
+}
+.text-link:hover { color: var(--accent); gap: 0.75rem; }
+.cta-note { font-size: 0.9375rem; color: var(--text-3); max-width: 40ch; }
+
+/* ---------- 6. Work ---------- */
+.projects { border-top: 1px solid var(--border); }
+.project {
+  position: relative;
+  display: grid; grid-template-columns: 16rem minmax(0, 1fr); gap: 1.75rem;
+  padding-block: 2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Thumbnail with its overlay. Resting: a soft tint (tames bright screenshots in dark mode,
+   adds depth in light mode). Hover or focus: tint lifts, a scrim rises from the bottom,
+   and a "View site" pill slides in. On touch screens the pill and scrim are always shown. */
+.project-thumb {
+  position: relative; isolation: isolate; align-self: start;
+  aspect-ratio: 16 / 9; overflow: hidden;
+  border: 1px solid var(--border); border-radius: 10px; background: var(--surface);
+}
+.project-thumb img {
+  width: 100%; height: 100%; object-fit: cover; object-position: left top;
+  transition: transform 600ms var(--ease);
+}
+.project-thumb::before,
+.project-thumb::after {
+  content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  transition: opacity 350ms var(--ease);
+}
+.project-thumb::before { background: var(--thumb-tint); }
+.project-thumb::after {
+  background: linear-gradient(to top, var(--thumb-scrim) 0%, rgba(0, 0, 0, 0) 70%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  opacity: 0;
+}
+.thumb-cta {
+  position: absolute; z-index: 2; left: 0.75rem; bottom: 0.75rem;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.4rem 0.75rem; border-radius: 999px;
+  background: #F5F4F0; color: #1F1F1F;               /* always light: reads on the dark scrim in both themes */
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  font-size: 0.8125rem; font-weight: 600; line-height: 1.2;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 300ms var(--ease), transform 350ms var(--ease);
+}
+.project:hover .project-thumb img, .project:focus-within .project-thumb img { transform: scale(1.04); }
+.project:hover .project-thumb::before, .project:focus-within .project-thumb::before { opacity: 0; }
+.project:hover .project-thumb::after,  .project:focus-within .project-thumb::after  { opacity: 1; }
+.project:hover .thumb-cta, .project:focus-within .thumb-cta { opacity: 1; transform: none; }
+.project:hover .thumb-cta .arrow { transform: translate(2px, -2px); }
+@media (hover: none) {
+  .project-thumb::before { opacity: 0; }
+  .project-thumb::after { opacity: 1; }
+  .thumb-cta { opacity: 1; transform: none; }
+}
+
+.project-body { min-width: 0; }
+.project-kind { font-size: 0.875rem; line-height: 1.4; color: var(--text-3); }
+.project-title { margin-top: 0.35rem; font-family: var(--font-serif); font-weight: 400; font-size: 2rem; line-height: 1.12; letter-spacing: -0.01em; }
+.project-link {
+  display: inline;
+  background-image: linear-gradient(var(--accent), var(--accent));
+  background-repeat: no-repeat; background-position: 0 100%; background-size: 0 1px;
+  transition: background-size 350ms var(--ease), color 200ms;
+}
+.title-arrow { display: inline-block; margin-left: 0.3em; vertical-align: -0.1em; color: var(--text-3); transition: transform 250ms var(--ease), color 200ms; }
+.project-link::after { content: ""; position: absolute; inset: 0; border-radius: 10px; }  /* the whole row is the link */
+.project:hover .project-link, .project-link:focus-visible { background-size: 100% 1px; color: var(--text); }
+.project:hover .title-arrow { transform: translate(2px, -2px); color: var(--accent); }
+.project-link:focus-visible { outline: none; }
+.project-link:focus-visible::after { outline: 2px solid var(--accent); outline-offset: 5px; }
+
+.project-desc { margin-top: 0.75rem; max-width: 46ch; font-size: 1.0625rem; line-height: 1.7; color: var(--text-2); }
+.arrow { transition: transform 250ms var(--ease); }
+.text-link:hover .arrow { transform: translateX(2px); }
+
+@media (max-width: 40rem) {
+  .project { grid-template-columns: 1fr; gap: 1.25rem; padding-block: 1.75rem; }
+  .project-title { font-size: 1.75rem; }
+}
+
+/* ---------- 7. Rows: services, skills, experience, contact ---------- */
+.rows { border-top: 1px solid var(--border); }
+.rows > :last-child, .projects > li:last-child .project { border-bottom: 0; }
+.row {
+  display: grid; grid-template-columns: minmax(0, 13.5rem) minmax(0, 1fr); gap: 0.35rem 1.75rem;
+  padding-block: 1.4rem; border-bottom: 1px solid var(--border);
+}
+.row-key { font-size: 1rem; font-weight: 600; line-height: 1.5; color: var(--text); }
+.row-val { max-width: 60ch; font-size: 1rem; line-height: 1.7; color: var(--text-2); }
+.row-dates { display: flex; align-items: center; gap: 0.6rem; font-weight: 500; font-size: 0.9375rem; color: var(--text-3); align-self: start; padding-top: 0.15rem; }
+.now { width: 7px; height: 7px; border-radius: 50%; background: var(--online); }
+
+.row--stack { grid-template-columns: 1fr; gap: 0.8rem; }
+.inline-list {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 0.4rem 1.75rem;
+  font-size: 1rem; line-height: 1.55; color: var(--text-2);
+}
+
+.job-title { font-size: 1.1875rem; font-weight: 600; line-height: 1.4; color: var(--text); }
+.job-company { margin-top: 0.1rem; font-weight: 500; color: var(--text-2); }
+.job-desc { margin-top: 0.75rem; max-width: 58ch; }
+
+@media (max-width: 40rem) {
+  .row { grid-template-columns: 1fr; gap: 0.3rem; padding-block: 1.25rem; }
+  .row-dates { padding-top: 0; }
+}
+
+/* ---------- 8. Contact & footer ---------- */
+.contact-title {
+  font-family: var(--font-serif); font-weight: 400;
+  font-size: clamp(2.5rem, 1.7rem + 3.2vw, 3.75rem); line-height: 1.05; letter-spacing: -0.02em;
+}
+.contact-mail { margin: 1.5rem 0 3rem; font-family: var(--font-serif); font-size: clamp(1.5rem, 1.1rem + 1.8vw, 2.25rem); line-height: 1.2; overflow-wrap: anywhere; }
+.contact-mail a {
+  border-bottom: 1px solid var(--text-3); padding-bottom: 3px;
+  transition: color 200ms, border-color 200ms;
+}
+.contact-mail a:hover, .contact-mail a:focus-visible { color: var(--accent); border-color: var(--accent); }
+
+.site-footer {
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem 1.5rem;
+  padding-block: 1.75rem 2.5rem; border-top: 1px solid var(--border);
+  font-size: 0.875rem; color: var(--text-3);
+}
+
+/* ---------- 9. UI ---------- */
+.toast {
+  position: fixed; left: 50%; bottom: 1.25rem; z-index: 70;
+  max-width: min(92vw, 420px); padding: 0.7rem 1rem; border-radius: 10px;
+  background: var(--text); color: var(--bg);
+  font-size: 0.875rem; line-height: 1.45; text-align: center; pointer-events: none;
+  opacity: 0; transform: translate(-50%, 8px);
+  transition: opacity 200ms var(--ease), transform 200ms var(--ease);
+}
+.toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---------- 10. Motion ---------- */
+.js .reveal {
+  opacity: 0; transform: translateY(10px);
+  transition: opacity 500ms var(--ease), transform 500ms var(--ease);
+}
+.js .reveal.is-in { opacity: 1; transform: none; }
+
+/* Theme switch: the new theme wipes in as a circle growing from the toggle (View Transitions).
+   Browsers without it get a quick colour fade instead (.theme-anim). */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-old(root) { z-index: 1; }
+::view-transition-new(root) { z-index: 2; }
+::view-transition-group(theme-toggle) { animation-duration: 450ms; animation-timing-function: var(--ease); }
+
+.theme-anim, .theme-anim *, .theme-anim *::before, .theme-anim *::after {
+  transition: background-color 280ms ease, border-color 280ms ease, color 280ms ease !important;
+}
+
+/* ---------- 11. Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; transition-delay: 0s !important; }
+  .js .reveal { opacity: 1; transform: none; }
+  .project:hover .project-thumb img, .project:focus-within .project-thumb img { transform: none; }
+}
